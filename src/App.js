@@ -52,47 +52,36 @@ function App() {
     return (
 
         <div>
-
-            <Container>
-                <Typography
-                    color="textPrimary"
-                    variant="h3"
-                    align="center"
-                    paragraph
-                > Upcoming games{" "} </Typography>
-                <Typography color="textPrimary"
-                            variant="h4"
-                            align="center"
-                            paragraph>Track games!</Typography>
-
-
-                <Grid container spacing={2}>
-                    {data.map((game, index) => (
-                        <Grid item xs={12} sm={3} key={index}>
+            <Typography
+                color="textPrimary"
+                variant="h3"
+                align="center"
+                paragraph
+            > Casino{" "} </Typography>
+            <Container >
+                <Grid container spacing={4}>
+                        {data.map((game, index) => (
+                        <Grid item key={index}  container spacing={1} xs={2}  >
                             <Card
                                 sx={{
-                                    display: 'block',
-                                    maxWidth: 'auto',
                                     boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",
                                     backgroundColor: "#fafafa",
-                                    height: 1,
                                     transition: "transform 0.15s ease-in-out",
                                     "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},
                                     transformStyle: 'preserve-3d',
+
                                 }}
                             >
-                                <CardActionArea>
-                                    <CardMedia   sx={{height: 426, width: 324}}
+                                <CardActionArea  >
+                                    <CardMedia component="img"
                                                image={"https://"+ game.gameThumbnail}
+
                                     />
                                 </CardActionArea>
-                                <CardContent>
-                                    {game.gameName}
-                                </CardContent>
+
                             </Card>
                         </Grid>
                     ))}
-
                 </Grid>
             </Container>
         </div>
