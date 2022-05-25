@@ -1,14 +1,27 @@
 import './App.css';
-import {Card, CardActionArea, CardContent, CardMedia, Chip, Container, Grid, Paper, Typography} from "@mui/material";
+import {
+    Autocomplete,
+    Card,
+    CardActionArea,
+    CardContent,
+    CardMedia,
+    Chip,
+    Container,
+    Grid,
+    Paper,
+    Stack, TextField,
+    Typography
+} from "@mui/material";
 import {useEffect, useState} from "react";
-import Casino from "./components/Casino";
+import {Casino} from "./components/Casino";
 
 
 function App() {
 
-
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [data, setData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
+    const [filteredData, setFilteredData] = useState(null);
     const [date, setDate] = useState('')
     const [chosenCategory, setChosenCategory] = useState([])
     const [chosenGamesArray, setChosenGamesArray] = useState([])
@@ -22,21 +35,49 @@ function App() {
     // const selected = data.filter(data => data.categories.includes(chosenCategory.game));
     // console.log(selected)
 
+
+
+
+    const initialData = () => {
+        let x = fetch('https://www.mocky.io/v2/5da99f9f31000036004e0a4e')
+            .then((res) => res.json())
+            .then((data) => setData(data))
+            .then(() => console.log('getinitialuseffectrun'))
+            .then(() => console.log(data))
+            .catch(error => {
+                console.log('Error getting data: ' + error);
+            })
+    }
+
+
+    useEffect(() => {
+        console.log('none chosen')
+        initialData()
+    }, [])
+
+
     const handleClick = (id, game) => {
         let x = id
+        console.log(chosenCategory.length)
+
         if (chosenCategory.some(item => item.id === x)) {
             // console.log('already chosen')
             removeCategory(x, game)
-            console.log(chosenCategory)
-
+            // console.log(chosenCategory)
             // console.log(newPlatforms)
             document.getElementById(id).style.backgroundColor = 'white';
+            if (chosenCategory.length === 1) {
+                console.log('nullified')
+                setFilteredData(null)
+                initialData()
+            }
+
         } else {
             document.getElementById(id).style.backgroundColor = 'green';
             setChosenCategory(chosenCategory => [...chosenCategory, {id: id, game: game}])
             let x = chosenCategory.map(a => a.game);
             setChosenGamesArray(chosenGamesArray => [...chosenGamesArray, game])
-            console.log(chosenGamesArray)
+            // console.log(chosenGamesArray)
 
             // let result = data.map((a) => ({
             //     gameName: a.gameName,
@@ -56,19 +97,11 @@ function App() {
         setChosenGamesArray(f.filter(v => v !== game))
     }
 
+
     useEffect(() => {
 
-            console.log('none chosen')
-            fetch('https://www.mocky.io/v2/5da99f9f31000036004e0a4e')
-                .then((res) => res.json())
-                .then((data) => setData(data))
-                .then(() => console.log('useffectrun'))
-                // .then(() => console.log(data))
-                .catch(error => {
-                    console.log('Error getting data: ' + error);
-                })
 
-        if (chosenCategory.length >= 1)  {
+        if (chosenCategory.length >= 1) {
             // let x = chosenCategory.map(a => a.game);
             // // console.log(x)
             // fetch('https://www.mocky.io/v2/5da99f9f31000036004e0a4e')
@@ -119,87 +152,130 @@ function App() {
 
     return (
         <div>
+
             <Typography
                 color="textPrimary"
-                variant="h3"
+                variant="h4"
                 align="center"
-                paragraph
             > Casino{" "} </Typography>
             <Grid item xs={2}>
                 <Grid sx={{
-                    p: 3,
-                    spacing: 2,
+                    p: 1,
+                    spacing: 1,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
                     {gameCategories.map(({game, id}) => (
-                        <Chip variant="outlined" clickable={true} label={game} id={id}
+                        <Chip variant="outlined" clickable={true} label={game.toUpperCase()} id={id}
                               onClick={() => handleClick(id, game)}
                         />))}
+
                 </Grid>
+                <Container sx={{
+                    p: 2,
+                    spacing: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
+                    <Stack spacing={1} sx={{ width: 300 }} >
+                        <Autocomplete
+                            id="free-solo-demo"
+                            freeSolo
+                            options={data.map((option) => option.gameName)}
+                            renderInput={(params) => <TextField {...params} label="Search" />}
+                        />
+                    </Stack>
+                </Container>
+
             </Grid>
 
-            {/*<Casino></Casino>*/}
+            <Container maxWidth="xl" >
 
-            <Container maxWidth="xl">
-                {filteredData ? <Grid container spacing={3}>
-                    {filteredData.map((game, index) => (
-                            <Grid item key={index} container spacing={2} xs={3}>
-                                <Card
-                                    sx={{
-                                        boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",
-                                        backgroundColor: "#fafafa",
-                                        transition: "transform 0.15s ease-in-out",
-                                        "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},
-                                        transformStyle: 'preserve-3d',
-                                    }}
-                                >
-                                    <CardActionArea>
-                                        <CardMedia component="img"
-                                                   image={"https://" + game.gameThumbnail}/>
-                                    </CardActionArea>
-                                    {/*<div>*/}
-                                    {/*    {game.categories.filter(games => games.includes('table games')).map(filteredName => (*/}
-                                    {/*        <li>*/}
-                                    {/*            {filteredName}*/}
-                                    {/*        </li>*/}
-                                    {/*    ))}*/}
-                                    {/*</div>*/}
-                                </Card>
-                            </Grid>
-                        )
-                    )}
-                </Grid> : <Grid container spacing={3}>
-                    {data.map((game, index) => (
-                            <Grid item key={index} container spacing={2} xs={3}>
-                                <Card
-                                    sx={{
-                                        boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",
-                                        backgroundColor: "#fafafa",
-                                        transition: "transform 0.15s ease-in-out",
-                                        "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},
-                                        transformStyle: 'preserve-3d',
-                                    }}
-                                >
-                                    <CardActionArea>
-                                        <CardMedia component="img"
-                                                   image={"https://" + game.gameThumbnail}/>
-                                    </CardActionArea>
-                                    {/*<div>*/}
-                                    {/*    {game.categories.filter(games => games.includes('table games')).map(filteredName => (*/}
-                                    {/*        <li>*/}
-                                    {/*            {filteredName}*/}
-                                    {/*        </li>*/}
-                                    {/*    ))}*/}
-                                    {/*</div>*/}
-                                </Card>
-                            </Grid>
-                        )
-                    )}
-                </Grid>}
-
+                {filteredData ? <Casino props={filteredData}></Casino> :
+                    <Grid container spacing={3}>
+                        {data.map((game, index) => (
+                                <Grid item key={index} container spacing={2} xs={3}>
+                                    <Card
+                                        sx={{
+                                            boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",
+                                            backgroundColor: "#fafafa",
+                                            transition: "transform 0.15s ease-in-out",
+                                            "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},
+                                            transformStyle: 'preserve-3d',
+                                        }}>
+                                        <CardActionArea>
+                                            <CardMedia component="img"
+                                                       image={"https://" + game.gameThumbnail}/>
+                                        </CardActionArea>
+                                    </Card>
+                                </Grid>
+                            )
+                        )}
+                    </Grid>}
             </Container>
+
+            }}
+
+            {/*<Container maxWidth="xl">*/}
+            {/*    {filteredData ? <Grid container spacing={3}>*/}
+            {/*        {filteredData.map((game, index) => (*/}
+            {/*                <Grid item key={index} container spacing={2} xs={3}>*/}
+            {/*                    <Card*/}
+            {/*                        sx={{*/}
+            {/*                            boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",*/}
+            {/*                            backgroundColor: "#fafafa",*/}
+            {/*                            transition: "transform 0.15s ease-in-out",*/}
+            {/*                            "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},*/}
+            {/*                            transformStyle: 'preserve-3d',*/}
+            {/*                        }}*/}
+            {/*                    >*/}
+            {/*                        <CardActionArea>*/}
+            {/*                            <CardMedia component="img"*/}
+            {/*                                       image={"https://" + game.gameThumbnail}/>*/}
+            {/*                        </CardActionArea>*/}
+            {/*                        /!*<div>*!/*/}
+            {/*                        /!*    {game.categories.filter(games => games.includes('table games')).map(filteredName => (*!/*/}
+            {/*                        /!*        <li>*!/*/}
+            {/*                        /!*            {filteredName}*!/*/}
+            {/*                        /!*        </li>*!/*/}
+            {/*                        /!*    ))}*!/*/}
+            {/*                        /!*</div>*!/*/}
+            {/*                    </Card>*/}
+            {/*                </Grid>*/}
+            {/*            )*/}
+            {/*        )}*/}
+            {/*    </Grid> : <Grid container spacing={3}>*/}
+            {/*        {data.map((game, index) => (*/}
+            {/*                <Grid item key={index} container spacing={2} xs={3}>*/}
+            {/*                    <Card*/}
+            {/*                        sx={{*/}
+            {/*                            boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.3)",*/}
+            {/*                            backgroundColor: "#fafafa",*/}
+            {/*                            transition: "transform 0.15s ease-in-out",*/}
+            {/*                            "&:hover": {transform: "scale3d(1.02, 1.02, 1)"},*/}
+            {/*                            transformStyle: 'preserve-3d',*/}
+            {/*                        }}*/}
+            {/*                    >*/}
+            {/*                        <CardActionArea>*/}
+            {/*                            <CardMedia component="img"*/}
+            {/*                                       image={"https://" + game.gameThumbnail}/>*/}
+            {/*                        </CardActionArea>*/}
+            {/*                        /!*<div>*!/*/}
+            {/*                        /!*    {game.categories.filter(games => games.includes('table games')).map(filteredName => (*!/*/}
+            {/*                        /!*        <li>*!/*/}
+            {/*                        /!*            {filteredName}*!/*/}
+            {/*                        /!*        </li>*!/*/}
+            {/*                        /!*    ))}*!/*/}
+            {/*                        /!*</div>*!/*/}
+            {/*                    </Card>*/}
+            {/*                </Grid>*/}
+            {/*            )*/}
+            {/*        )}*/}
+            {/*    </Grid>}*/}
+
+            {/*</Container>*/}
         </div>
 
     );
