@@ -8,7 +8,6 @@ import {
     Chip,
     Container,
     Grid,
-    Paper,
     Stack, TextField,
     Typography
 } from "@mui/material";
@@ -18,6 +17,9 @@ import {Casino} from "./components/Casino";
 
 function App() {
 
+
+
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [data, setData] = useState([]);
@@ -25,25 +27,24 @@ function App() {
     const [date, setDate] = useState('')
     const [chosenCategory, setChosenCategory] = useState([])
     const [chosenGamesArray, setChosenGamesArray] = useState([])
-    const [gameCategories, setGameCategories] = useState([{id: 1, game: "slots"}, {id: 2, game: "table games"}, {
-        id: 3,
-        game: "jackpots"
-    }, {id: 4, game: "favourites"}, {id: 5, game: "newest"}, {id: 6, game: "instant win"},
-        {id: 7, game: "Daily Jackpots"}, {id: 8, game: "top games"}, {id: 9, game: "exciting games"}])
-
+    const [gameCategories, setGameCategories] = useState([{id: 1, game: "slots"},
+        {id: 2, game: "table games"}, {id: 3, game: "jackpots"},
+        {id: 4, game: "favourites"}, {id: 5, game: "newest"},
+        {id: 6, game: "instant win"}, {id: 7, game: "Daily Jackpots"},
+        {id: 8, game: "top games"}, {id: 9, game: "exciting games"}])
+    const [activeButton, setActiveButton] = useState([])
+    const [searchValue, setSearchValue] = useState('')
 
     // const selected = data.filter(data => data.categories.includes(chosenCategory.game));
     // console.log(selected)
-
-
 
 
     const initialData = () => {
         let x = fetch('https://www.mocky.io/v2/5da99f9f31000036004e0a4e')
             .then((res) => res.json())
             .then((data) => setData(data))
-            .then(() => console.log('getinitialuseffectrun'))
-            .then(() => console.log(data))
+            // .then(() => console.log('getinitialuseffectrun'))
+            // .then(() => console.log(data))
             .catch(error => {
                 console.log('Error getting data: ' + error);
             })
@@ -51,41 +52,26 @@ function App() {
 
 
     useEffect(() => {
-        console.log('none chosen')
+        // console.log('none chosen')
         initialData()
     }, [])
 
 
     const handleClick = (id, game) => {
         let x = id
-        console.log(chosenCategory.length)
-
         if (chosenCategory.some(item => item.id === x)) {
-            // console.log('already chosen')
             removeCategory(x, game)
-            // console.log(chosenCategory)
-            // console.log(newPlatforms)
-            document.getElementById(id).style.backgroundColor = 'white';
+            setActiveButton(activeButton.filter(v => v !== id))
             if (chosenCategory.length === 1) {
-                console.log('nullified')
                 setFilteredData(null)
                 initialData()
             }
-
         } else {
-            document.getElementById(id).style.backgroundColor = 'green';
+            setActiveButton(activeButton => [...activeButton, id])
             setChosenCategory(chosenCategory => [...chosenCategory, {id: id, game: game}])
             let x = chosenCategory.map(a => a.game);
             setChosenGamesArray(chosenGamesArray => [...chosenGamesArray, game])
-            // console.log(chosenGamesArray)
 
-            // let result = data.map((a) => ({
-            //     gameName: a.gameName,
-            //     gamePreviewUrl: a.gamePreviewUrl,
-            //     gameThumbnail: a.gameThumbnail,
-            //     language: a.language,
-            //     slug: a.slug,
-            //     game: a.categories}));
 
         }
 
@@ -97,10 +83,7 @@ function App() {
         setChosenGamesArray(f.filter(v => v !== game))
     }
 
-
     useEffect(() => {
-
-
         if (chosenCategory.length >= 1) {
             // let x = chosenCategory.map(a => a.game);
             // // console.log(x)
@@ -118,6 +101,30 @@ function App() {
             setFilteredData(result1)
         }
     }, [chosenCategory]);
+
+
+    const searchTrigger = (value) =>{
+        console.log(value)
+
+        function gameExists(value) {
+            return data.some(function(el) {
+                return el.value === value;
+            });
+        }
+
+        if (value === null) {
+
+            console.log('wtf')
+            setFilteredData(data)
+        } else if(gameExists()) {
+            console.log('search run')
+            setFilteredData(data.filter(item => item.gameName === value))
+        }
+
+
+
+    }
+
 
     // useEffect(() => {
     //
@@ -149,10 +156,10 @@ function App() {
     //     }
     // }, [chosenCategory]);
 
+    console.log(searchValue)
 
     return (
         <div>
-
             <Typography
                 color="textPrimary"
                 variant="h4"
@@ -167,7 +174,8 @@ function App() {
                     justifyContent: 'center'
                 }}>
                     {gameCategories.map(({game, id}) => (
-                        <Chip variant="outlined" clickable={true} label={game.toUpperCase()} id={id}
+                        <Chip color={activeButton.includes(id) ? 'success' : 'primary'} variant="outlined" clickable={true}
+                              label={game.toUpperCase()} id={id}
                               onClick={() => handleClick(id, game)}
                         />))}
 
@@ -179,19 +187,19 @@ function App() {
                     alignItems: 'center',
                     justifyContent: 'center'
                 }}>
-                    <Stack spacing={1} sx={{ width: 300 }} >
+                    <Stack spacing={1} sx={{width: 300}}>
                         <Autocomplete
-                            id="free-solo-demo"
+                            id="free-solo"
+                            onChange={(event, value) => searchTrigger(value)}
                             freeSolo
                             options={data.map((option) => option.gameName)}
-                            renderInput={(params) => <TextField {...params} label="Search" />}
+                            renderInput={(params) => <TextField {...params} label="Search"/>}
                         />
                     </Stack>
                 </Container>
-
             </Grid>
 
-            <Container maxWidth="xl" >
+            <Container maxWidth="xl">
 
                 {filteredData ? <Casino props={filteredData}></Casino> :
                     <Grid container spacing={3}>
@@ -216,7 +224,7 @@ function App() {
                     </Grid>}
             </Container>
 
-            }}
+
 
             {/*<Container maxWidth="xl">*/}
             {/*    {filteredData ? <Grid container spacing={3}>*/}
