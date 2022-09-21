@@ -1,8 +1,8 @@
 import './App.css';
 import {Card, CardActionArea, CardMedia, Chip, Container, createTheme, Grid, ThemeProvider} from "@mui/material";
 import {useEffect, useState} from "react";
-import {Casino} from "./components/Casino";
-import PrimarySearchAppBar from "./components/DenseAppBar";
+import {Casino} from "../../galaxy2/src/components/Casino";
+import PrimarySearchAppBar from "../../galaxy2/src/components/DenseAppBar";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 
